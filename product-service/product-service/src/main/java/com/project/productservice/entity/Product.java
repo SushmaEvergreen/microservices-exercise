@@ -17,6 +17,10 @@ public class Product {
 	private Double price;
 	private Integer stock;
 	
+	 public Integer getStock() {
+	        return stock;
+	    }
+	
 }
 
 	
