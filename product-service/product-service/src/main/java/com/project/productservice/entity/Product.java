@@ -17,9 +17,25 @@ public class Product {
 	private Double price;
 	private Integer stock;
 	
-	 public Integer getStock() {
-	        return stock;
-	    }
+	public Integer getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 	
 }
 

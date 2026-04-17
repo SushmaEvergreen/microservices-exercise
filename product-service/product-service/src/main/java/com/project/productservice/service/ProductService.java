@@ -36,4 +36,9 @@ public class ProductService {
         Optional<Product> product = productRepository.findById(productId);
         return product.isPresent() && product.get().getStock() >= quantity;
     }
+    
+ // DELETE PRODUCT
+    public void deleteProduct(Integer id) {
+        productRepository.deleteById(id);
+    }
 }

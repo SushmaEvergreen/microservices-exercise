@@ -33,4 +33,15 @@ public class CartService {
     public List<CartItem> getAllItems() {
         return cartItemRepository.findAll();
     }
+
+ //DELETE ITEM 
+    public void deleteItem(Integer id) {
+        cartItemRepository.deleteById(id);
+    }
+
+    //GET ALL CARTS 
+    public List<Cart> getAllCarts() {
+        return cartRepository.findAll();
+    }
 }
+
