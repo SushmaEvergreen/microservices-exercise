@@ -19,7 +19,7 @@ public class CartItem {
 
     public Integer getId() {
         return id;
-    }
+    }                                                                        
 
     public Integer getCartId() {
         return cartId;
