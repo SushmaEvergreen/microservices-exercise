@@ -75,5 +75,14 @@ public class ProductService {
                 .toList();
     }
     
+ // NATIVE QUERY SERVICE METHOD
+    public List<ProductDTO> getProductsAbovePrice(double price) {
+
+        return productRepository.findProductsAbovePrice(price)
+                .stream()
+                .map(p -> new ProductDTO(p.getName(), p.getPrice()))
+                .toList();
+    }
+    
 }
 

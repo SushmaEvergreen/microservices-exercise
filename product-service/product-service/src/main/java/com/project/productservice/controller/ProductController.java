@@ -47,6 +47,13 @@ public class ProductController {
         return productService.getFilteredProducts(minPrice);
     }
     
+ // NATIVE QUERY API
+    @GetMapping("/native")
+    public List<ProductDTO> getProductsAbovePrice(@RequestParam double price) {
+        return productService.getProductsAbovePrice(price);
+    }
+    
+    
     //GET PRODUCT BY ID
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable Integer id) {
