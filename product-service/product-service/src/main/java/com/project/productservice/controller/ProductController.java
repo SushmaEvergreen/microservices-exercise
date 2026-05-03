@@ -10,6 +10,10 @@ import com.project.productservice.entity.Product;
 import com.project.productservice.service.ProductService;
 import com.project.productservice.dto.ProductDTO;
 
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+
 @RestController
 @RequestMapping("/products")
 public class ProductController {
@@ -55,11 +59,35 @@ public class ProductController {
     
     
     //GET PRODUCT BY ID
+   // @GetMapping("/{id}")
+    //public Product getProductById(@PathVariable Integer id) {
+        //return productService.getProductById(id);
+    //}
+    
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable Integer id) {
-        return productService.getProductById(id);
-    }
+    //public ProductDTO getProductById(@PathVariable Integer id) {//
+    
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Integer id){
 
+        Product product = productService.getProductById(id);
+         
+        if (product == null) {
+            //throw new RuntimeException("Product not found");//
+        	return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        	
+        }
+        
+        return ResponseEntity.ok(
+                new ProductDTO(
+        //return new ProductDTO(//
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getStock()
+                )
+        );
+    }
+    
     //UPDATE PRODUCT
     @PutMapping("/{id}")
     public Product updateProduct(@PathVariable Integer id, @RequestBody Product product) {

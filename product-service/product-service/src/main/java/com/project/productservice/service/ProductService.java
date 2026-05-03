@@ -44,9 +44,14 @@ public class ProductService {
         Page<Product> productPage = productRepository.findAll(pageable);
 
         //Java Streams (Entity → DTO)
-        return productPage.map(p -> new ProductDTO(p.getName(), p.getPrice()));
+        return productPage.map(p -> new ProductDTO(
+                p.getId(),
+                p.getName(),
+                p.getPrice(),
+                p.getStock()
+        ));
     }
-
+   
     // GET PRODUCT BY ID
     public Product getProductById(Integer id) {
         Optional<Product> product = productRepository.findById(id);
@@ -71,7 +76,12 @@ public class ProductService {
                 .stream()
                 .filter(p -> p.getPrice() >= minPrice)
                 .sorted((p1, p2) -> Double.compare(p1.getPrice(), p2.getPrice())) // sorting added
-                .map(p -> new ProductDTO(p.getName(), p.getPrice()))
+                .map(p -> new ProductDTO(
+                        p.getId(),
+                        p.getName(),
+                        p.getPrice(),
+                        p.getStock()
+                ))
                 .toList();
     }
     
@@ -80,7 +90,12 @@ public class ProductService {
 
         return productRepository.findProductsAbovePrice(price)
                 .stream()
-                .map(p -> new ProductDTO(p.getName(), p.getPrice()))
+                .map(p -> new ProductDTO(
+                        p.getId(),
+                        p.getName(),
+                        p.getPrice(),
+                        p.getStock()
+                ))
                 .toList();
     }
     
