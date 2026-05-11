@@ -62,18 +62,20 @@ public class CartService {
         
      //Step 3: Create Kafka Event
         CartEvent event = new CartEvent(
-                savedItem.getCartId(),
+                savedItem.getId(),
                 savedItem.getProductId(),
                 savedItem.getQuantity()
         );
         
         
      //Step 4: Send Event to Kafka
-        try {
+        cartProducer.sendEvent(event);
+        
+       /** try {
             cartProducer.sendEvent(event);
         } catch (Exception e) {
             System.out.println("Kafka not available, skipping event...");
-        }
+        }**/
         
         // Return saved item
         return savedItem;
