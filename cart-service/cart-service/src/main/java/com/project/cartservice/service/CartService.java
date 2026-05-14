@@ -1,6 +1,7 @@
 package com.project.cartservice.service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,16 +38,27 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-    // ADD ITEM TO CART
+    // ADD ITEM TO CART (ASYNC IMPLEMENTATION)
     
     public CartItem addItem(CartItem item) {
 
        /** // Step 1: Call Product Service
         ProductDto product = productClient.getProductById(item.getProductId());**/
+    	
+    	// Step 1: Fetch product asynchronously
+        CompletableFuture<ProductDto> productFuture =
+                CompletableFuture.supplyAsync(() ->
+                        productClient.getProductById(item.getProductId().longValue())
+                );
         
-        ProductDto product = productClient.getProductById(item.getProductId().longValue());
+       // ProductDto product = productClient.getProductById(item.getProductId().longValue());
 
         //Validation 1: Product exists
+        
+     // Step 2: Validate stock asynchronously
+        CompletableFuture<Void> validationFuture =
+                productFuture.thenAccept(product -> {
+        
         if (product == null) {
             throw new RuntimeException("Product not found");
         }
@@ -55,12 +67,15 @@ public class CartService {
         if (product.getStock() < item.getQuantity()) {
             throw new RuntimeException("Insufficient stock");
         }
+         });
         
+     // Step 3: Wait for async tasks to complete
+        CompletableFuture.allOf(productFuture, validationFuture).join();
         
-        //Step 2 : Save item
+        //Step 4 : Save item
         CartItem savedItem = cartItemRepository.save(item);
         
-     //Step 3: Create Kafka Event
+     //Step 5: Create Kafka Event
         CartEvent event = new CartEvent(
                 savedItem.getId(),
                 savedItem.getProductId(),
@@ -68,7 +83,7 @@ public class CartService {
         );
         
         
-     //Step 4: Send Event to Kafka
+     //Step 6: Send Event to Kafka
         cartProducer.sendEvent(event);
         
        /** try {
