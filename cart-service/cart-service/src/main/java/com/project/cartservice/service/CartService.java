@@ -1,5 +1,8 @@
 package com.project.cartservice.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -19,6 +22,8 @@ import com.project.cartservice.producer.CartProducer;
 
 @Service
 public class CartService {
+	
+	private static final Logger logger = LoggerFactory.getLogger(CartService.class);
 
     @Autowired
     private CartRepository cartRepository;
@@ -34,7 +39,8 @@ public class CartService {
 
     // Custom thread pool (real-world best practice)
     private final ExecutorService executor = Executors.newFixedThreadPool(5);
-
+    
+     
     // CREATE CART
     public Cart createCart(Cart cart) {
         return cartRepository.save(cart);
@@ -44,7 +50,23 @@ public class CartService {
     public CartItem addItem(CartItem item) {
 
         try {
+        	
+        	logger.info("Add item API called with productId: {}, quantity: {}", 
+                    item.getProductId(), item.getQuantity());
+        	
+        	// STEP 0: Input Validation
+        	if (item.getQuantity() == null) {
+        		logger.error("Validation failed: Quantity is null");
+        	    throw new IllegalArgumentException("Quantity cannot be null");
+        	}
 
+        	if (item.getQuantity() <= 0) {
+        		logger.error("Validation failed: Quantity must be greater than 0");
+        	    throw new IllegalArgumentException("Quantity must be greater than 0");
+        	}
+        	
+        	logger.info("Validation successful for productId: {}", item.getProductId());
+        	
             // STEP 1: Fetch product asynchronously
         	CompletableFuture<ProductDto> productFuture =
                     CompletableFuture.supplyAsync(() -> {
@@ -77,9 +99,13 @@ public class CartService {
 
             // STEP 3: Wait only once (non-blocking until here)
             validatedFuture.join();
+            
+            logger.info("Async product fetch and validation completed");
 
             // STEP 4: Save item
             CartItem savedItem = cartItemRepository.save(item);
+            
+            logger.info("Item saved to DB with id: {}", savedItem.getId());
 
             // STEP 5: Create Kafka Event
             CartEvent event = new CartEvent(
@@ -90,11 +116,15 @@ public class CartService {
 
             // STEP 6: Send Event to Kafka
             cartProducer.sendEvent(event);
+            
+            logger.info("Event sent to Kafka for cartId: {}", savedItem.getId());
 
             return savedItem;
 
-        } catch (Exception e) {
-            throw new RuntimeException("Async processing failed: " + e.getMessage());
+        } 
+        catch (Exception e) {
+        	logger.error("Error while adding item", e);
+        	throw e;
         }
     }
 
